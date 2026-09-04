@@ -41,7 +41,7 @@ async function SignInPage({ searchParams }: SignInPageProps) {
             className="text-foreground"
           />
         </div>
-        <CardTitle className="text-base">Welcome back</CardTitle>
+        <CardTitle className="text-base">Sign into code bunny</CardTitle>
         <CardDescription>
           Sign in with GitHub to review and manage your code.
         </CardDescription>

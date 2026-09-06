@@ -1,5 +1,6 @@
 import { savePullRequest } from "@/features/reviews/server/save-pull-request";
 import { getGithubApp } from "../utils/github-app";
+import { inngest } from "@/features/inngest/client";
 
 const REVIEWABLE_ACTIONS = ["opened", "synchronize", "reopened"];
 
@@ -44,12 +45,18 @@ export async function handleGithubWebhook(request: Request) {
   }
 
   const event = JSON.parse(payload) as pullRequestWebhookPayload;
-console.log(event)
+
   if (!REVIEWABLE_ACTIONS.includes(event.action)) {
     return Response.json({ received: true });
   }
 
-  const pullRequest = await savePullRequest(event)
+  const pullRequest = await savePullRequest(event);
 
-   return Response.json({ received: true });
+  // trigger event
+  await inngest.send({
+    name: "github/pr.received",
+    data: { pullRequestId: pullRequest.id },
+  });
+
+  return Response.json({ received: true });
 }

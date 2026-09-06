@@ -7,7 +7,6 @@ import {
   GitBranch,
   GithubLogo,
   Gear,
-  FileCIcon
 } from "@phosphor-icons/react";
 
 

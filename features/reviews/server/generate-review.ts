@@ -41,14 +41,14 @@ Then use this structure if there are findings:
 - If the diff looks clean with no concerns, say so clearly in 1–2 sentences — do not invent problems
 - Tailor feedback to the repository language and conventions visible in the diff`;
 
+
 type ReviewInput = {
   repoFullName: string;
   title: string;
   /** Chunks retrieved from the PR's Pinecone namespace */
-//   contextSnippets: string[];
+  contextSnippets: string[];
   /** Optional chunks from repo-sync namespace (full codebase context) */
-//   repoContextSnippets: string[];
- diff: string;
+  repoContextSnippets: string[];
 };
 
 function buildRepoContextSection(repoContextSnippets: string[]) {
@@ -66,11 +66,19 @@ function buildRepoContextSection(repoContextSnippets: string[]) {
 }
 
 export async function generateReview(input: ReviewInput) {
+  const context = input.contextSnippets.join("\n\n---\n\n");
+  const repoContextSection = buildRepoContextSection(input.repoContextSnippets);
+
   const { text } = await generateText({
     model: openrouter(REVIEW_MODEL),
     system: SYSTEM_PROMPT,
-    prompt: `Repository: ${input.repoFullName} Pull request title: ${input.title} ${input.diff} ${buildRepoContextSection([])}`,
+    prompt: `Repository: ${input.repoFullName}
+  Pull request title: ${input.title}
+  
+  Code changes:
+  
+  ${context}${repoContextSection}`,
   });
 
-  return text
+  return text;
 }

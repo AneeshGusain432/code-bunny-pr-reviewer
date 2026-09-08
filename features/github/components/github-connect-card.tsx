@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormStatus } from "react-dom";
+import Link from "next/link";
 import { ArrowSquareOut, GithubLogo, Plugs } from "@phosphor-icons/react";
 
 import type { GithubInstallationStatus } from "@/features/dashboard/lib/types";
@@ -11,6 +13,7 @@ import { getGithubInstallUrl } from "@/features/github/utils/github-app";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Card,
   CardContent,
@@ -20,9 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import Link from "next/link";
 import { disconnectGithubApp } from "../action";
-
 
 type GithubConnectCardProps = {
   userId: string;
@@ -54,17 +55,26 @@ function DisconnectedDetails() {
   );
 }
 
+function DisconnectButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      variant="outline"
+      disabled={pending}
+      className={statusButtonClass.danger}
+    >
+      {pending ? <Spinner className="size-4" /> : <Plugs />}
+      {pending ? "Uninstalling from GitHub..." : "Disconnect GitHub App"}
+    </Button>
+  );
+}
+
 function ConnectedActions() {
   return (
     <form action={disconnectGithubApp}>
-      <Button
-        type="submit"
-        variant="outline"
-        className={statusButtonClass.danger}
-      >
-        <Plugs />
-        Disconnect GitHub App
-      </Button>
+      <DisconnectButton />
     </form>
   );
 }

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { GithubInstallationStatus } from "./../../dashboard/lib/types";
+import { getGithubApp } from "../utils/github-app";
 
 async function getGithubLoginForUser(userId: string): Promise<string | null> {
   const user = await prisma.user.findUnique({
@@ -70,8 +71,27 @@ export async function saveInstallation(userId: string, installationId: number) {
   });
 }
 
+
 export async function deleteInstallation(userId: string) {
-  await prisma.githubInstallation.delete({
+  const installation = await prisma.githubInstallation.findUnique({
+    where: { userId },
+  });
+
+  if (installation?.installationId) {
+    try {
+      const app = getGithubApp();
+      await app.octokit.request("DELETE /app/installations/{installation_id}", {
+        installation_id: installation.installationId,
+      });
+    } catch (error) {
+      console.error(
+        "Failed to delete installation from GitHub (it may already be uninstalled):",
+        error,
+      );
+    }
+  }
+
+  await prisma.githubInstallation.deleteMany({
     where: {
       userId,
     },

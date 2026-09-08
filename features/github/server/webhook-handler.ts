@@ -1,6 +1,9 @@
 import { savePullRequest } from "@/features/reviews/server/save-pull-request";
 import { getGithubApp } from "../utils/github-app";
 import { inngest } from "@/features/inngest/client";
+import { getUserIdByInstallationId } from "./installation";
+import { canUserReview } from "@/features/billing/server/usage";
+import { prisma } from "@/lib/db";
 
 const REVIEWABLE_ACTIONS = ["opened", "synchronize", "reopened"];
 
@@ -40,6 +43,16 @@ export async function handleGithubWebhook(request: Request) {
     return Response.json({ error: "invalid signature" }, { status: 401 });
   }
 
+  if (eventName === "installation") {
+    const event = JSON.parse(payload);
+    if (event.action === "deleted" && event.installation?.id) {
+      await prisma.githubInstallation.deleteMany({
+        where: { installationId: event.installation.id },
+      });
+    }
+    return Response.json({ received: true });
+  }
+
   if (eventName !== "pull_request") {
     return Response.json({ received: true });
   }
@@ -51,6 +64,21 @@ export async function handleGithubWebhook(request: Request) {
   }
 
   const pullRequest = await savePullRequest(event);
+
+  const userId = await getUserIdByInstallationId(event.installation.id);
+
+  if (userId) {
+    const allowed = await canUserReview(userId);
+
+    if (!allowed) {
+      await prisma.pullRequest.update({
+        where: { id: pullRequest.id },
+        data: { status: "rate_limited" },
+      });
+
+      return Response.json({ received: true, rateLimited: true });
+    }
+  }
 
   // trigger event
   await inngest.send({

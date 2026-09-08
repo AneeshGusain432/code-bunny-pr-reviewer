@@ -20,10 +20,10 @@ export const DASHBOARD_NAV_ITEMS = [
     href: DASHBOARD_ROUTES.repos,
     icon: "folder-git-2" as const,
   },
-   {
-    title: "PullRequests",
+  {
+    title: "Pull Requests",
     href: DASHBOARD_ROUTES.pullRequest,
-    icon: "folder-git-2" as const,
+    icon: "git-pull-request" as const,
   },
   {
     title: "GitHub App",

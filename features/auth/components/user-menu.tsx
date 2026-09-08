@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SIGN_IN_PATH } from "../utils";
 import { LogOut } from "lucide-react";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 const DEFAULT_PLAN = "Free";
 
@@ -75,12 +77,18 @@ export function UserMenu({
 }: UserMenuProps) {
   const router = useRouter();
   const displayName = getDisplayName(user);
+  const [loading, setIsloading] = useState(false);
 
   const handleSignOut = async () => {
+    setIsloading(true);
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
           router.push(SIGN_IN_PATH);
+          setIsloading(false);
+        },
+        onError: () => {
+          setIsloading(false);
         },
       },
     });
@@ -130,9 +138,20 @@ export function UserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
-            <LogOut />
-            Log out
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={handleSignOut}
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                {<Spinner className="size-4" />} Redirecting to home...{" "}
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                {<LogOut />} Log out{" "}
+              </span>
+            )}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

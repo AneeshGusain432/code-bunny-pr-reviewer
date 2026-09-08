@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   title: "Code Bunny — AI PR Reviews for GitHub",
   description:
     "Code Bunny reviews every GitHub pull request instantly with AI — catching bugs, improving readability, and enforcing your team's standards 24/7.",
+  icons: {
+    icon: "/code-bunny-logo.png",
+    apple: "/code-bunny-logo.png",
+  },
 };
 
 export default function RootLayout({

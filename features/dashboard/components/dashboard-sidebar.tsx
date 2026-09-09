@@ -24,7 +24,7 @@ type DashboardSidebarProps = {
 
 export function DashboardSidebar({
   user,
-  plan = "Pro",
+  plan,
 }: DashboardSidebarProps) {
   return (
     <Sidebar collapsible="icon">

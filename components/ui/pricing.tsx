@@ -30,7 +30,7 @@ const PLANS = [
   {
     name: "Pro",
     description: "For teams shipping code regularly.",
-    price: "499",
+    price: "99",
     period: "per month",
     features: [
       "Unlimited AI reviews",

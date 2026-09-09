@@ -12,6 +12,7 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      redirectURI: "https://www.codebunny.in/api/auth/callback/github",
       
       mapProfileToUser: async (profile) => ({
         email: profile.email ?? `${profile.id}@users.noreply.github.com`,

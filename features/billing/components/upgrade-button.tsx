@@ -57,7 +57,6 @@ export function UpgradeButton() {
 
       checkout.open();
     } catch (error) {
-      console.log(error);
       const message =
         error instanceof Error ? error.message : "Could not start checkout.";
       toast.error(message);

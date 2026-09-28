@@ -277,16 +277,29 @@ export async function deleteRepoNamespace(namespace: string) {
 export async function saveRepoChunks(namespace: string, chunks: CodeChunk[]) {
   const index = await getPineConeIndex();
 
-  for (let start = 0; start < chunks.length; start += UPSERT_BATCH_SIZE) {
-    const batch = chunks.slice(start, start + UPSERT_BATCH_SIZE);
+  const validChunks = chunks.filter(
+    (chunk) => typeof chunk.text === "string" && chunk.text.trim().length > 0,
+  );
 
-    const records = batch.map((chunk) => ({
-      id: chunk.id,
-      text: chunk.text,
-      filePath: chunk.filePath,
-    }));
+  const skipped = chunks.length - validChunks.length;
+  if (skipped > 0) {
+    console.warn(`Skipped ${skipped} empty chunks for namespace ${namespace}`);
+  }
 
-    await index.namespace(namespace).upsertRecords({ records });
+  if (validChunks.length === 0) return;
+
+  const ns = index.namespace(namespace);
+
+  for (let start = 0; start < validChunks.length; start += UPSERT_BATCH_SIZE) {
+    const batch = validChunks.slice(start, start + UPSERT_BATCH_SIZE);
+
+    await ns.upsertRecords({
+      records: batch.map((chunk) => ({
+        id: chunk.id,
+        text: chunk.text,
+        filePath: chunk.filePath,
+      })),
+    });
   }
 }
 
